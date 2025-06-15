@@ -10,14 +10,15 @@
 static const char *TAG = "MQTT_RGB";
 static esp_mqtt_client_handle_t client = NULL;
 
-extern const uint8_t ca_crt_start[]      asm("_binary_ca_crt_start");
-extern const uint8_t ca_crt_end[]        asm("_binary_ca_crt_end");
+extern const uint8_t _binary_ca_crt_start[] asm("_binary_ca_crt_start");
+extern const uint8_t _binary_ca_crt_end[]   asm("_binary_ca_crt_end");
 
-extern const uint8_t client_crt_start[]  asm("_binary_client_crt_start");
-extern const uint8_t client_crt_end[]    asm("_binary_client_crt_end");
+extern const uint8_t _binary_client_crt_start[] asm("_binary_client_crt_start");
+extern const uint8_t _binary_client_crt_end[]   asm("_binary_client_crt_end");
 
-extern const uint8_t client_key_start[]  asm("_binary_client_key_start");
-extern const uint8_t client_key_end[]    asm("_binary_client_key_end");
+extern const uint8_t _binary_client_key_start[] asm("_binary_client_key_start");
+extern const uint8_t _binary_client_key_end[]   asm("_binary_client_key_end");
+
 
 
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data) {
@@ -65,16 +66,33 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 
 void mqtt_app_start(void) {
     const esp_mqtt_client_config_t mqtt_cfg = {
-        .broker.address.uri = "mqtts://192.168.1.195:8883",
+        // .broker.address.uri = "mqtts://192.168.1.195:8883",
         // .broker.address.port = (int)1883
         //.broker.address.transport = MQTT_TRANSPORT_OVER_TCP
         // .broker.verification.certificate = (const char *)ca_cert_pem,
         // .broker.verification.certificate = 
         //  .cert_pem = (const char *)broker_cert_pem_start, // same embedding as above
-        .broker.verification.certificate = (const char *)ca_crt_start,
-        .credentials.authentication.certificate = (const char *)client_crt_start,
-        .credentials.authentication.key = (const char *)client_key_start,
-        
+
+        // .broker.verification.certificate = (const char *)ca_crt_start,
+        // .credentials.authentication.certificate = (const char *)client_crt_start,
+        // .credentials.authentication.key = (const char *)client_key_start,
+
+        // .broker.address.uri = "mqtts://192.168.1.195:8883",
+        // .broker.verification.certificate = (const char *) ca_crt_start,
+        // .credentials = {
+        // .authentication = {
+        //     .certificate = (const char *)client_crt_start,
+        //     .key = (const char *)client_key_start,
+        // }
+
+         .broker.address.uri = "mqtts://192.168.1.195:8883",
+    .broker.verification.certificate = (const char *) _binary_ca_crt_start,
+    .credentials = {
+        .authentication = {
+            .certificate = (const char *) _binary_client_crt_start,
+            .key = (const char *) _binary_client_key_start,
+        }
+    }
     };
 
     client = esp_mqtt_client_init(&mqtt_cfg);
